@@ -5,33 +5,33 @@ and a lightweight task runner that drives rope visuals and player movement.
 The end-to-end flow is functional: the player can scope, shoot, see a rope extend, get pulled toward the hit point, get oriented on arrival, and return to normal. 
 However, the program could benefit from fine tuning for timing, edge cases (such as rapid input), and animation design. 
 
-Grapple.client.lua is the client controller.
+ToolClient.lua is the client controller, parented to the Tool. 
   - Loads and plays equip/hold animations on equip and sets the tool’s grip
   - Right-click to scope: shifts camera to the Offset, draws a laser from the Barrel to the cursor, and applies upper-body tilt
   - Left-click to fire: sends a camera ray to the server via FireGrapple and stops local scoping visuals
   - On server acknowledgement: restores camera/mouse modes and re-enables character animations
   - Cleans up connections and state on unequip
 
-Header.lua is the client helper.
+Header.lua is a module script parented to ToolClient.lua
   - Caches references to Player, Player parts, Camera, and animations. 
   - Creates a laser part for targeting 
   - Tilts the upper body within clamped limits
   - Positions Camera
   - Performs a brief scope-in zoom toward the current aim ray using the Offset part.
 
-ServerGrapple.server.lua is the server controller. 
+Server.lua is the server controller. 
   - Performs a server-side raycast that excludes the shooter and their tool
   - Runs a movement pipeline using the Mover module
   - Sends a client acknowledgement to allow local cleanup or UI updates.
 
-MoverMod.lua is the task runner. 
+MoverMod.lua is the task runner, parented to Server.lua 
   - Creates and grows a rope from the barrel toward the hit point
   - Moves the player toward the impact while shrinking the rope
   - Orients the character relative to the surface normal.
 
 The overall logic and runtime work, but feel and timings still need refinement: 
-- Movement speed
-- Rope growth 
-- Retraction rates
+  - Movement speed
+  - Rope growth 
+  - Retraction rates
 
 
