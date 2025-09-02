@@ -1,5 +1,6 @@
 --[[
 	Mover Module
+	Parented to main script in ServerScriptService
 	------------
 	A lightweight action runner for character-driven movement tasks (e.g., grappling),
 	with helper utilities for humanoid/HRP lookup and a rope visual that shrinks
