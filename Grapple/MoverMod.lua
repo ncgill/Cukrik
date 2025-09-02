@@ -13,7 +13,6 @@
 		- Mover:Init() -> self (registers built-in tasks)
 		- Mover:Run(tasks) (executes a list of named tasks with args)
 	- Task callbacks are stored in self._movers[name] and are invoked by name.
-	- Runtime logic and variable names are preserved exactly as provided.
 ]]
 
 local Mover = {
