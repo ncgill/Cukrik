@@ -8,11 +8,6 @@
 	  - LMB (shoot): fires a ray to the server, plays hold animation, and resets state.
 	  - Remote ack from server: restores camera/mouse, re-enables character animations.
 	  - Unequip: stops all running connections, restores character/camera defaults.
-
-	Notes:
-	- Variable names and runtime logic are preserved exactly.
-	- Only top-level declarations are grouped for clarity (services → remotes → player/camera → tool → state).
-	- Added professional-style docstrings/comments; no functional changes.
 ]]
 
 ----------------------------------------------------------------------------------------------------
