@@ -1,0 +1,19 @@
+This section contains an Ice Staff firing setup composed of a client controller, a server controller, and a ragdoll helper. 
+The client handles animations, aiming, wrist tweens, and projectile VFX.  
+The server validates hits, mirrors basic projectile motion, and applies ragdoll/respawn effects.
+
+IceStaff.client.lua is the client controller, parented to the tool.
+  - Loads and plays the staff animation, rotates the character to face the cursor, and tweens the wrist to aim
+  - Computes tween timing vs. animation length and fires the server with a camera ray via fireStaffRE
+  - Spawns and drives a local ice orb VFX toward the server-provided target and distance, then emits a burst and cleans up
+  - Manages temporary movement lock, hand visibility, and debounce during the firing sequence
+
+IceStaff.lua is the server controller. 
+  - Performs a server-side raycast (excluding the shooter and their character) and creates a server orb that moves on Heartbeat
+  - Notifies the client with the impact position and distance to drive VFX, and mirrors basic orb travel server-side
+  - Detects orb touch on humanoids, clones a ragdoll corpse, runs onDied effects, then fades the original model back in and restores it to Workspace
+  - Uses simple guards/debounce and cleans up connections and temporary parts
+
+Ragdoll.lua is the ragdoll helper, parented to IceStaff.lua
+  - .Clone() produces a ragdoll-like corpse model from the target and describes physics logic. 
+  - .onDied() triggers the ragdoll/death sequence and returns when finished
