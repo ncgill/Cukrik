@@ -1,0 +1,16 @@
+This section contains a Telekinesis setup composed of a client controller and a server controller. 
+The client handles input, animations, and rune VFX 
+The server validates a “Telekinetic” target, applies a bounded floating motion while held, and cleans up on release.
+
+The end-to-end flow is functional: the player can aim at eligible targets, lift them with a looped float, maintain the effect while holding the button, and drop/restore the target on release. The system still benefits from tuning for float timing, effect bounds, animation speed, and edge-case input.
+
+ToolClient.lua is the client controller:
+  - Loads and plays idle/lift/hold/drop/float tracks on equip and spawns rune effects on both hands
+  - Right-click press over a “Telekinetic” part freezes movement, plays the lift animation, and tells the server to begin floating
+  - Right-click release restores walk speed and fires EndFloat to stop the server-side effect
+  - On unequip, stops animations, destroys rune clones, and resets local state
+
+Server.lua is the server controller:
+  - Receives a client camera ray and animation, raycasts (excluding the player and their character), and validates a target named “Telekinetic”
+  - Anchors the target, applies smoke VFX, and repeatedly lerps it to randomized positions/rotations within a bounded region while “holding” is true
+  - Listens for EndFloat to stop the loop, unanchor the target, remove VFX, and end the animation
