@@ -2,11 +2,11 @@
 	Header Module
   Parented to client tool script in tool object
 	-------------
-	Provides a small helper object for first-person/over-the-shoulder weapon handling:
+	Provides a small helper object for shooting runtime 
 	- Loads and configures equip/hold animation tracks.
 	- Stores references to the player's character, camera, and upper-body joints.
 	- Exposes helpers to:
-	  * spawn a neon laser Part (Laser),
+	  * spawn a laser part
 	  * apply lean/rotation to waist and neck based on mouse delta (Tilt),
 	  * position the camera behind/above the character (FollowCamera),
 	  * scope in with a short camera zoom toward the current aim ray (ScopeIn).
@@ -15,7 +15,7 @@
 	- Header.new(tool: Instance, player: Player) -> Header
 	- The module is callable: require(Header)(tool, player) == Header.new(tool, player)
 
-	Fields (selected):
+	Fields:
 	- Player, playerChar, Camera
 	- equipAnim, holdAnim, equipAnimTrack, holdAnimTrack
 	- waist, neck, origWaist, origNeck
@@ -27,8 +27,6 @@
 local Header = {}
 Header.__index = Header
 
---- Construct a new Header helper object for the given tool and player.
--- Loads animations, caches character/camera/joints, and sets aiming limits.
 -- @param tool Instance The tool instance owning assets like animations and offset.
 -- @param player Player The local player this header will control.
 -- @return table Header instance with helper methods and cached references.
@@ -49,7 +47,7 @@ function Header.new(tool: Instance, player: Player)
 	self.holdAnimTrack.Priority = Enum.AnimationPriority.Action4
 	self.holdAnimTrack.Looped = true 
 
-	-- Aiming limits (radians)
+	-- Tilt limits
 	self.MAX_LEAN = math.rad(45)
 	self.MIN_LEAN = math.rad(-10)
 	self.MIN_ROT  = math.rad(-45)
@@ -112,11 +110,9 @@ function Header.new(tool: Instance, player: Player)
 	end
 	
 	--- Scope in with a short zoom animation toward the current aim direction.
-	-- Eases the camera position toward self.offset while looking along the given ray.
 	-- @param hrpCF CFrame The character's HumanoidRootPart CFrame at scope start.
 	-- @param ray Ray The current view ray (Origin, Direction).
-	-- @param deb any Unused argument preserved for compatibility.
-	self.ScopeIn = function(hrpCF, ray, deb)
+	self.ScopeIn = function(hrpCF, ray)
 		local world = hrpCF:VectorToWorldSpace(Vector3.new(0,3,0)) 
 		local origin = hrpCF.Position + hrpCF.LookVector * -4
 		self.Camera.CFrame = CFrame.lookAt(
@@ -141,7 +137,6 @@ function Header.new(tool: Instance, player: Player)
 	return self
 end
 
--- Keep module callable: require(Header)(tool, player) → Header.new(tool, player)
 setmetatable(Header, {
 	__call = function(_, tool: Instance, player: Player)
 		return Header.new(tool, player)
