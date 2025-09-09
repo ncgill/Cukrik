@@ -2,42 +2,33 @@
 	Client Grapple Controller
 	-------------------------
 	Client-side controller for a Grapple tool. Handles:
-	  • Equipping: loads/plays equip/hold animations and sets tool grip.
-	  • Scoping (RMB): enters scoped view, locks movement/animation, and draws a laser
+	  - Equipping: loads/plays equip/hold animations and sets tool grip.
+	  - Scoping (RMB): enters scoped view, locks movement/animation, and draws a laser
 	    from the barrel toward the mouse ray while allowing upper-body tilt.
-	  • Shooting (LMB while scoped): sends a camera ray to the server, plays hold loop,
+	  - Shooting (LMB while scoped): sends a camera ray to the server, plays hold loop,
 	    and stops local scoping visuals.
-	  • Server acknowledgement: restores camera/mouse modes and character animations.
-	  • Unequipping: disconnects/cleans up runtime connections and restores defaults.
+	  - Server acknowledgement: restores camera/mouse modes and character animations.
+	  - Unequipping: disconnects/cleans up runtime connections and restores defaults.
 ]]
 
-----------------------------------------------------------------------------------------------------
--- Services (cached)
-----------------------------------------------------------------------------------------------------
+-- Services
 local RepStorage = game:GetService("ReplicatedStorage")
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RS = game:GetService("RunService")
 local FireGrappleEvent = game:GetService("ReplicatedStorage"):WaitForChild("FireGrapple")
 
-----------------------------------------------------------------------------------------------------
--- Player / Camera Context
-----------------------------------------------------------------------------------------------------
 local Camera = workspace.CurrentCamera
 local Player = Players.LocalPlayer
 
-----------------------------------------------------------------------------------------------------
 -- Tool / Parts
-----------------------------------------------------------------------------------------------------
 local tool = script.Parent
 local handle = script.Parent:WaitForChild("Handle")
 local barrel = handle:WaitForChild("Barrel")
 local laser = nil 
 local playerChar = Player.Character
 
-----------------------------------------------------------------------------------------------------
 -- Runtime State / Connections
-----------------------------------------------------------------------------------------------------
 local equipped, scoped, shoot, tilt, ended
 local running = {} 
 local ub = false 
@@ -88,9 +79,7 @@ function Scoping(offset, laser)
 	end
 end
 
-----------------------------------------------------------------------------------------------------
 -- Equip: prepare Header, animations, grip, and scoped interaction
-----------------------------------------------------------------------------------------------------
 equipped = tool.Equipped:Connect(function() 
 	H = require(script:WaitForChild("Header"))(tool, Player)
 
@@ -115,11 +104,11 @@ equipped = tool.Equipped:Connect(function()
 
 		local debScope, debShoot, debEnd = false, false, false 
 
-		-- Right mouse button → enter scoped mode and start laser/camera updates
+		-- Right mouse button to enter scoped mode and start laser/camera updates
 		scoped = UIS.InputBegan:Connect(function(input)
 			if input.UserInputType == Enum.UserInputType.MouseButton2 and not debScope then running[#running + 1] = scoped 
 
-				--UIS.MouseBehavior = Enum.MouseBehavior.LockCenter; Camera.CameraType = Enum.CameraType.Scriptable
+				UIS.MouseBehavior = Enum.MouseBehavior.LockCenter; Camera.CameraType = Enum.CameraType.Scriptable
 
 				local mouseLoc = UIS:GetMouseLocation()
 				local finished = H.ScopeIn(hrp.CFrame, Camera:ViewportPointToRay(mouseLoc.X, mouseLoc.Y))
@@ -153,9 +142,7 @@ equipped = tool.Equipped:Connect(function()
 	end
 end)
 
-----------------------------------------------------------------------------------------------------
--- Shoot: left mouse while scoped → send ray to server and stop local scoping
-----------------------------------------------------------------------------------------------------
+-- Shoot: left mouse click while scoped, send ray to server and stop local scoping
 local debounce = false
 shoot = UIS.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and scoped and not debounce then 
@@ -177,9 +164,7 @@ shoot = UIS.InputBegan:Connect(function(input)
 	end
 end)
 
-----------------------------------------------------------------------------------------------------
 -- Server acknowledgement: restore camera/mouse and re-enable animations
-----------------------------------------------------------------------------------------------------
 FireGrappleEvent.OnClientEvent:Connect(function()
 	Player.CameraMode = Enum.CameraMode.LockFirstPerson
 	wait(1)
@@ -192,9 +177,7 @@ FireGrappleEvent.OnClientEvent:Connect(function()
 	playerChar["Animate"].Enabled = true 
 end)
 
-----------------------------------------------------------------------------------------------------
 -- Unequip: cleanup and restore defaults
-----------------------------------------------------------------------------------------------------
 tool.Unequipped:Connect(function()
 	Player.CameraMode = Enum.CameraMode.Classic
 	Stop(running)
