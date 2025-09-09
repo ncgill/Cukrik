@@ -7,43 +7,25 @@
       - Listens for EndFloat to release the target, stop the animation, and clean up VFX.
 ]]
 
-----------------------------------------------------------------------------------------------------
--- Services (cached)
-----------------------------------------------------------------------------------------------------
+-- Services
 local RS = game:GetService("RunService")
-
-----------------------------------------------------------------------------------------------------
--- Remotes / Network
-----------------------------------------------------------------------------------------------------
 local teleRE = game:GetService("ReplicatedStorage"):WaitForChild("telekinRE")
 local EndFloatRE = teleRE:WaitForChild("EndFloat")
 
-----------------------------------------------------------------------------------------------------
+
 -- Runtime State
-----------------------------------------------------------------------------------------------------
 local charging
 local charge
--- 'holding' is referenced later exactly as in the original script (intentionally not declared here).
 
-----------------------------------------------------------------------------------------------------
 -- Constants / Tuning
-----------------------------------------------------------------------------------------------------
 local MOVE_TIME  = 2
 local MAX_CHARGE = 3
 local BUFFER     = 4
-
-----------------------------------------------------------------------------------------------------
--- Random Generator
-----------------------------------------------------------------------------------------------------
 local rng = Random.new(tick())
 
-----------------------------------------------------------------------------------------------------
 -- Helpers
-----------------------------------------------------------------------------------------------------
-
 --- Float a target part within a randomized bounded region near the original CFrame.
--- Moves the target toward a random position and rotation, interpolated over MOVE_TIME,
--- so long as 'holding' remains true (as in the original script).
+-- Moves the target toward a random position and rotation, interpolated over MOVE_TIME so long as 'holding' remains true (as in the original script).
 -- @param originalCF CFrame The original CFrame used as a reference for bounds.
 -- @param target BasePart The telekinetic target to float.
 -- @return boolean Always true when one float segment completes.
@@ -93,10 +75,7 @@ function Float(originalCF, target)
 	return true
 end
 
-----------------------------------------------------------------------------------------------------
 -- Connections / Runtime
-----------------------------------------------------------------------------------------------------
-
 -- Receives the client ray + animation and begins telekinetic float if a "Telekinetic" part is hit.
 teleRE.OnServerEvent:Connect(function(player, ray, anim)
 	local tool = player.Character:WaitForChild("telekinesis")
