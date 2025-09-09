@@ -6,50 +6,32 @@
     this client animates the orb's flight and handles impact burst VFX.
 ]]
 
-----------------------------------------------------------------------------------------------------
--- Services 
-----------------------------------------------------------------------------------------------------
+-- Services
 local TS = game:GetService("TweenService")
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-
-----------------------------------------------------------------------------------------------------
--- Remote/Event & Animation Asset
-----------------------------------------------------------------------------------------------------
 local fireStaffRE = game:GetService("ReplicatedStorage"):WaitForChild("fireStaffRE")
-local fireStaffAnim = Instance.new("Animation")
-fireStaffAnim.AnimationId = "rbxassetid://76027817760585"
+local Camera = workspace.CurrentCamera
 
-----------------------------------------------------------------------------------------------------
 -- Tool / Parts
-----------------------------------------------------------------------------------------------------
 local tool = script.Parent
 local handle = tool:WaitForChild("Handle")
 local particles = tool:WaitForChild("iceParticles")
-local iceParticles = tool:WaitForChild("iceParticles") 
+local iceParticles = tool:WaitForChild("iceParticles")
 
-----------------------------------------------------------------------------------------------------
 -- Player / Character
-----------------------------------------------------------------------------------------------------
 local player = game.Players.LocalPlayer
 local humanoid = player.Character:WaitForChild("Humanoid")
 local BASE_GRIP = tool.Grip
 local hand = nil
 local hrp = player.Character:WaitForChild("HumanoidRootPart")
 
-----------------------------------------------------------------------------------------------------
 -- Animation Track
-----------------------------------------------------------------------------------------------------
 local fireStaffTrack = humanoid:LoadAnimation(fireStaffAnim)
+local fireStaffAnim = Instance.new("Animation")
+fireStaffAnim.AnimationId = "rbxassetid://76027817760585"
 
-----------------------------------------------------------------------------------------------------
--- Camera / Input
-----------------------------------------------------------------------------------------------------
-local Camera = workspace.CurrentCamera
-
-----------------------------------------------------------------------------------------------------
 -- Constants / Configuration
-----------------------------------------------------------------------------------------------------
 local ORB_PROPERTIES = {
 	["Shape"] = "Ball",
 	["Size"] = Vector3.new(2,2,2),
@@ -61,21 +43,17 @@ local ORB_PROPERTIES = {
 	["Transparency"] = 1
 }
 
-----------------------------------------------------------------------------------------------------
 -- Runtime State
-----------------------------------------------------------------------------------------------------
 local frameReached = nil 
 local animMarkers = {}
 local debounce = false 
 
-----------------------------------------------------------------------------------------------------
--- Helpers
-----------------------------------------------------------------------------------------------------
 
+-- Helpers 
 --- Check whether a tween completed and optionally play a follow-up tween.
 -- @param playbackState Enum.PlaybackState The tween's final state from Completed.
 -- @param nextTween Tween? Optional tween to start when the current tween completes.
--- @return boolean True if tween completed and there is no follow-up; false otherwise.
+-- @return boolean True if tween completed and there is no follow-up
 function checkTweenCompleted(playbackState, nextTween)
 	if playbackState ~= Enum.PlaybackState.Completed then 
 		return false 
@@ -87,9 +65,8 @@ function checkTweenCompleted(playbackState, nextTween)
 end
 
 --- Spawn an orb part at the tool handle with default properties and ice particles.
--- @param start any Unused; retained to preserve the original function signature.
 -- @return Part The created orb instance parented to the player's character.
-function SpawnOrb(start)
+function SpawnOrb()
 	local orb = Instance.new("Part")
 	iceParticles:Clone().Parent = orb
 	orb.Name = player.Name.."Orb"
@@ -117,13 +94,10 @@ function Burst(orb)
 	burstParticles:Emit(100)
 end
 
-----------------------------------------------------------------------------------------------------
--- Input / Activation
-----------------------------------------------------------------------------------------------------
 
+-- Input / Activation
 -- Triggered when the tool is activated (e.g., mouse click while equipped).
--- Orients the character toward the mouse, plays wrist tweens + animation, and
--- sends a server fire request with a ray derived from the current mouse position.
+-- Orients the character toward the mouse, plays wrist tweens + animation, and sends a server fire request with a ray derived from the current mouse position.
 tool.Activated:Connect(function()
 
 	if debounce then print("No") return false end 
@@ -218,13 +192,9 @@ tool.Activated:Connect(function()
 	debounce = false 
 end)
 
-----------------------------------------------------------------------------------------------------
 -- Remote Response: Orb flight and impact VFX
-----------------------------------------------------------------------------------------------------
-
 -- Responds to the server with a target Vector3 and travel distance.
--- Spawns an orb, eases it toward the target using RenderStepped, then performs
--- impact cleanup and a particle burst on arrival.
+-- Spawns an orb, eases it toward the target using RenderStepped, then performs impact cleanup and a particle burst on arrival.
 fireStaffRE.OnClientEvent:Connect(function(target, distance)
 	local elapsed = 0 
 	local timer = distance / 150
