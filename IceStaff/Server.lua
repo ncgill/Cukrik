@@ -5,36 +5,19 @@
     the projectile (orb) travel, detects hits, and applies ragdoll/respawn VFX.
 ]]
 
-----------------------------------------------------------------------------------------------------
--- Services
-----------------------------------------------------------------------------------------------------
+-- Services / Network
 local TS = game:GetService("TweenService")        
 local RS = game:GetService("RunService")   
-
-----------------------------------------------------------------------------------------------------
--- Constants / Tuning
-----------------------------------------------------------------------------------------------------
-local MAX_DISTANCE = 100   -- Maximum range
-
-----------------------------------------------------------------------------------------------------
--- Modules
-----------------------------------------------------------------------------------------------------
 local RagDoll = require(script:WaitForChild("ragdoll")) 
-
-----------------------------------------------------------------------------------------------------
--- Remotes / Network
-----------------------------------------------------------------------------------------------------
 local fireStaffRE = game:GetService("ReplicatedStorage"):WaitForChild("fireStaffRE", 5)
 
+-- Constants / Tuning
+local MAX_DISTANCE = 100
 
-----------------------------------------------------------------------------------------------------
--- Helpers
-----------------------------------------------------------------------------------------------------
-
---- Gradually re-show (fade-in) a target model, then clean up the orb.
+-- Helpers: 
+-- Gradually re-show (fade-in) a target model, then clean up the orb.
 -- Hides all target children (pcall-wrapped) and destroys the orb.
--- Then re-parents the target to Workspace and animates child Transparency
--- from fully hidden back to visible over 'timer' seconds on Heartbeat.
+-- Then re-parents the target to Workspace and animates child Transparency from fully hidden back to visible over 'timer' seconds on Heartbeat.
 -- @param target Model The model to respawn/fade-in.
 -- @param orb Part The projectile orb Part to destroy.
 function respawn(target, orb)
@@ -61,19 +44,16 @@ function respawn(target, orb)
 	end)
 end
 
-----------------------------------------------------------------------------------------------------
 -- Connections / Runtime
-----------------------------------------------------------------------------------------------------
-
 -- Handles client fire requests:
--- 1) Creates a RemoteFunction (preserved from original, not invoked).
--- 2) Validates player/tool references and performs a raycast using the provided ray.
--- 3) Spawns a transparent orb and mirrors its travel toward the hit position.
--- 4) On touch with a humanoid (not belonging to the shooter), triggers ragdoll flow:
---    - Temporarily removes the target model from Workspace,
---    - Spawns a ragdoll corpse and runs onDied effects,
---    - Respawns (fade-in) the original target model,
---    - Cleans up corpse and connections.
+-- 1 Creates a RemoteFunction (preserved from original, not invoked).
+-- 2 Validates player/tool references and performs a raycast using the provided ray.
+-- 3 Spawns a transparent orb and mirrors its travel toward the hit position.
+-- 4 On touch with a humanoid (not belonging to the shooter), triggers ragdoll flow:
+--    	Temporarily removes the target model from Workspace,
+--      Spawns a ragdoll corpse and runs onDied effects,
+--      Respawns (fade-in) the original target model,
+--      Cleans up corpse and connections.
 fireStaffRE.OnServerEvent:Connect(function(player, action, tool, ray)
 
 	local runShoot = Instance.new("RemoteFunction")
