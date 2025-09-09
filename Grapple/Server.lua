@@ -3,9 +3,10 @@
 	-------------------------
 	Listens for client "FireGrapple" events, validates the shot with a server-side
 	raycast, and then orchestrates a sequence of player movement tasks via the Mover module:
-	  1) spawn_hook     – creates/extends a visible rope from the weapon barrel,
-	  2) move_to        – pulls the player toward the impact point while shrinking the rope,
-	  3) orient_player  – orients the character relative to the surface normal at impact.
+
+	spawn_hook     – creates/extends a visible rope from the weapon barrel
+	move_to        – pulls the player toward the impact point while shrinking the rope
+	orient_player  – orients the character relative to the surface normal at impact.
 
 	Networking:
 	- RemoteEvent: ReplicatedStorage.FireGrapple
@@ -19,13 +20,10 @@ local FireGrappleEvent = RepStorage:WaitForChild("FireGrapple")
 local RS = game:GetService("RunService")
 
 local Mover = require(script:WaitForChild("Move"))
-
--- Local placeholders (preserved from original)
 local player
 local grapple
 local barrel
 
--- Raycast configuration
 local PARAMS = RaycastParams.new()
 PARAMS.FilterType = Enum.RaycastFilterType.Exclude
 
@@ -41,11 +39,9 @@ FireGrappleEvent.OnServerEvent:Connect(function(player, ray, barrel, debounce)
 
 	local playerChar = player.Character
 	local barrel = playerChar:WaitForChild("Grapple")["Handle"]["Barrel"]
-
-	-- Fallback end position (visual aid); actual hit confirmed via Raycast below
+		
 	local hitPos = ray.Origin + ray.Direction * 200
 	
-	-- Exclude the player and their tool from intersection tests
 	PARAMS.FilterDescendantsInstances = { playerChar, barrel.Parent}
 	local testRay = workspace:Raycast(ray.Origin, ray.Direction * 200, PARAMS)
 
