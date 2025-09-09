@@ -16,10 +16,7 @@
 	- Task callbacks are stored in self._movers[name] and are invoked by name.
 ]]
 
-local Mover = {
-
-}
-
+local Mover = {}
 Mover.__index = Mover
 
 local RS = game:GetService("RunService")
