@@ -10,46 +10,25 @@
       - On death: cleans up rune effects and stops animations.
 ]]
 
-----------------------------------------------------------------------------------------------------
 -- Services
-----------------------------------------------------------------------------------------------------
 local UIS = game:GetService("UserInputService")
-
-----------------------------------------------------------------------------------------------------
--- Remotes / Network
-----------------------------------------------------------------------------------------------------
 local TeleRE = game:GetService("ReplicatedStorage"):WaitForChild("telekinRE")
 local EndFloatRE = TeleRE:WaitForChild("EndFloat")
-
-----------------------------------------------------------------------------------------------------
--- Player / Input / Camera (context)
-----------------------------------------------------------------------------------------------------
 local Player = game:GetService("Players").LocalPlayer
 local mouse = Player:GetMouse()
 local Camera = workspace.CurrentCamera
 
-----------------------------------------------------------------------------------------------------
--- Tool / Local State
-----------------------------------------------------------------------------------------------------
+
 local tool = script.Parent
 local equipped = false
 local debounce = false
-
-----------------------------------------------------------------------------------------------------
--- Visual Effects / Flags
-----------------------------------------------------------------------------------------------------
 local runes
+
+
+-- Connections / Runtime
 local grabbing
 local release
-
-----------------------------------------------------------------------------------------------------
--- Animations (tracks are assigned on equip)
-----------------------------------------------------------------------------------------------------
 local holdTrack, liftTrack, dropTrack, floatTrack, idleTrack
-
-----------------------------------------------------------------------------------------------------
--- Connections / Runtime
-----------------------------------------------------------------------------------------------------
 
 -- Equip: load animations, start idle loop, and attach rune effects to both hands.
 tool.Equipped:Connect(function()
@@ -76,7 +55,7 @@ tool.Equipped:Connect(function()
 		runes = {clone1, clone2}
 	end
 
-	-- RMB press: attempt to begin telekinetic grab if hovering a "Telekinetic" target
+	-- RMB press: attempt to begin telekinetic grab if hovering over a "Telekinetic" target
 	grabbing = UIS.InputBegan:Connect(function(input)
 		if not debounce and input.UserInputType == Enum.UserInputType.MouseButton2 and equipped then debounce = true
 			local mouseLoc = UIS:GetMouseLocation()
