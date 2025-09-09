@@ -1,17 +1,17 @@
 --[[
 	Mover Module
 	Parented to main script in ServerScriptService
-	------------
+
 	A lightweight action runner for character-driven movement tasks (e.g., grappling),
 	with helper utilities for humanoid/HRP lookup and a rope visual that shrinks
 	as the player moves toward a target.
 
 	Design notes:
 	- Public API:
-		- Mover.new() -> Mover
+		- Mover.new()
 		- Mover:Register(name, fn)
-		- Mover:Add(name, fn) / Mover:Remove(name)
-		- Mover:Init() -> self (registers built-in tasks)
+		- Mover:Add(name, fn), Mover:Remove(name)
+		- Mover:Init() self (registers built-in tasks)
 		- Mover:Run(tasks) (executes a list of named tasks with args)
 	- Task callbacks are stored in self._movers[name] and are invoked by name.
 ]]
@@ -49,9 +49,9 @@ end
 -- and scales/reorients the 'rope' Part so it appears to retract from 'barrel' to 'target'.
 -- @param hrp BasePart The player's HumanoidRootPart to move.
 -- @param target Vector3 The world-space target to approach.
--- @param factor number Normalized progress [0,1] along the path from original->target.
+-- @param factor number Normalized progress [0,1] along the path from original to target.
 -- @param original Vector3 The starting HRP world position.
--- @param rope Part? Optional rope Part to scale/orient during movement.
+-- @param rope Rope Part to scale/orient during movement.
 -- @param barrel BasePart The origin reference for the rope (e.g., grappling barrel).
 function MoveAndShrinkRope(hrp, target, factor, original, rope, barrel)
 	hrp.Anchored = true 
@@ -59,25 +59,14 @@ function MoveAndShrinkRope(hrp, target, factor, original, rope, barrel)
 	local lerp = original:Lerp(target, factor)
 	local moved = hrp.Position - lerp
 	if rope then
-		print("Shrinking")
-
-		-- Total distance from barrel to target
 		local totalDistance = (target - barrel.CFrame.Position).Magnitude
-
-		-- Rope shrinks as factor goes from 0 → 1
 		local currentLength = totalDistance * (1 - factor)
-		print(1 - factor)
 
-		-- Direction from barrel → target
 		local dir = (target - barrel.CFrame.Position).Unit
-
-		-- Compute the *new target* position closer to the barrel
 		local newTarget = barrel.CFrame.Position + dir * currentLength
-
-		-- Midpoint between barrel and new target
 		local mid = (barrel.CFrame.Position + newTarget) / 2
 
-		-- Update rope to stretch from barrel → newTarget
+		-- Update rope to stretch from barrel to newTarget
 		rope.Size = Vector3.new(0.15, 0.15, currentLength)
 		rope.CFrame = CFrame.lookAt(mid, newTarget)
 	end
@@ -89,12 +78,11 @@ function MoveAndShrinkRope(hrp, target, factor, original, rope, barrel)
 			lerp, target
 		) 
 	end
-
 end
 
---- Add (alias for Register) a task callback under a given name.
+--- Add a task callback under a given name.
 -- The callback is invoked later via Mover:Run or direct __call usage.
--- @param name string Unique task name.
+-- @param name string task name.
 -- @param fn function The function to store for this task.
 function Mover:Add(name: string, fn: (any) -> any)	
 	self._movers[name] = fn 		
@@ -126,8 +114,8 @@ function Mover.new()
 end
 
 --- Register a task callback under a given name.
--- @param name string Unique task name.
--- @param fn function The function to associate with the task.
+-- @param name string task name.
+-- @param fn function The function to store for this task.
 function Mover:Register(name, fn)
 	self._movers[name] = fn
 end
@@ -149,7 +137,6 @@ function Mover:Init()
 	self:Register("spawn_hook", function(self, player, barrel, ray)
 		print("Spawning")
 		if barrel then 
-			--part.PivotOffset = CFrame.new(-2,0,0)
 			local barrelPos = barrel.Position
 			local target = ray.Position
 			local distance = (target - barrel.Position).Magnitude
